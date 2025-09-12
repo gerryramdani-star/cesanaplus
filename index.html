@@ -636,6 +636,146 @@
             query, where, getDocs, writeBatch, orderBy
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+        // =================================================================
+        // BAGIAN 1: SELEKTOR DOM
+        // =================================================================
+        const loginScreen = document.getElementById('login-screen');
+        const loginBtn = document.getElementById('login-btn');
+        const appContainer = document.getElementById('app-container');
+        const sidebar = document.getElementById('sidebar');
+        const spreadsheetIndicator = document.getElementById('spreadsheet-indicator');
+        const userProfileContainer = document.getElementById('user-profile');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const hamburgerBtn = document.getElementById('hamburger-btn');
+        const globalToast = document.getElementById('global-toast');
+        const toastMessage = document.getElementById('toast-message');
+        const pageSections = document.querySelectorAll('.page-section');
+        const navItems = document.querySelectorAll('.nav-item a');
+        
+        // --- Dasbor ---
+        const greetingEl = document.getElementById('greeting');
+        const currentDateEl = document.getElementById('current-date');
+        const currentTimeEl = document.getElementById('current-time');
+        const summarySection = document.getElementById('summary-section');
+        const progressRingCircle = document.getElementById('progress-ring-circle');
+        const progressRingText = document.getElementById('progress-ring-text');
+        const totalPresentEl = document.getElementById('total-present');
+        const totalAbsentEl = document.getElementById('total-absent');
+        const classCardsContainer = document.getElementById('class-cards-container');
+
+        // --- Daftar Siswa & Laporan Individu ---
+        const studentListClassFilter = document.getElementById('student-list-class-filter');
+        const studentListTableContainer = document.getElementById('student-list-table-container');
+        const backToStudentListBtn = document.getElementById('back-to-student-list-btn');
+        const printReportBtn = document.getElementById('print-report-btn');
+        const individualReportContent = document.getElementById('individual-report-content');
+        
+        // --- Rekap Nilai ---
+        const gradeClassCardsContainer = document.getElementById('grade-class-cards-container');
+        const gradeInputPage = document.getElementById('grade-input-page');
+        const gradeInputClassTitle = document.getElementById('grade-input-class-title');
+        const assessmentSelect = document.getElementById('assessment-select');
+        const createAssessmentBtn = document.getElementById('create-assessment-btn');
+        const studentGradeListContainer = document.getElementById('student-grade-list-container');
+        const saveGradesBtn = document.getElementById('save-grades-btn');
+
+        // --- Laporan ---
+        const showAttendanceReportBtn = document.getElementById('show-attendance-report-btn');
+        const showGradeReportBtn = document.getElementById('show-grade-report-btn');
+        const attendanceReportView = document.getElementById('attendance-report-view');
+        const gradeReportView = document.getElementById('grade-report-view');
+        const reportClassSelect = document.getElementById('report-class-select');
+        const reportPeriodSelect = document.getElementById('report-period-select');
+        const generateReportBtn = document.getElementById('generate-report-btn');
+        const reportBtnSpinner = document.getElementById('report-btn-spinner');
+        const reportBtnText = document.getElementById('report-btn-text');
+        const customRangeContainer = document.getElementById('custom-range-container');
+        const reportStartDate = document.getElementById('report-start-date');
+        const reportEndDate = document.getElementById('report-end-date');
+        const reportOutput = document.getElementById('report-output');
+        const reportGuide = document.getElementById('report-guide');
+        const exportCsvBtn = document.getElementById('export-csv-btn');
+        const exportPdfBtn = document.getElementById('export-pdf-btn');
+        const reportPrintableArea = document.getElementById('report-printable-area');
+        const summaryTotalDays = document.getElementById('summary-total-days');
+        const summaryAvgPresence = document.getElementById('summary-avg-presence');
+        const summaryTotalStudents = document.getElementById('summary-total-students');
+        const summaryTotalRecords = document.getElementById('summary-total-records');
+        const reportTableBody = document.getElementById('report-table-body');
+        const reportChartCanvas = document.getElementById('report-chart');
+        // Laporan Nilai
+        const gradeReportClassSelect = document.getElementById('grade-report-class-select');
+        const generateGradeReportBtn = document.getElementById('generate-grade-report-btn');
+        const gradeReportBtnSpinner = document.getElementById('grade-report-btn-spinner');
+        const gradeReportBtnText = document.getElementById('grade-report-btn-text');
+        const gradeReportOutput = document.getElementById('grade-report-output');
+        const gradeReportGuide = document.getElementById('grade-report-guide');
+        const exportGradeCsvBtn = document.getElementById('export-grade-csv-btn');
+        const exportGradePdfBtn = document.getElementById('export-grade-pdf-btn');
+        const gradeReportPrintableArea = document.getElementById('grade-report-printable-area');
+        const gradeReportHeaderSubtitle = document.getElementById('grade-report-header-subtitle');
+        const gradeReportTableContainer = document.getElementById('grade-report-table-container');
+        const gradeReportStatsContainer = document.getElementById('grade-report-stats-container');
+        const gradeReportChartCanvas = document.getElementById('grade-report-chart');
+
+
+        // --- Integrasi ---
+        const gscriptUrlInput = document.getElementById('gscript-url');
+        const spreadsheetNameInput = document.getElementById('spreadsheet-name');
+        const saveGscriptUrlBtn = document.getElementById('save-gscript-url-btn');
+        const saveBtnSpinner = document.getElementById('save-btn-spinner');
+        const saveBtnText = document.getElementById('save-btn-text');
+        const connectionStatus = document.getElementById('connection-status');
+        
+        // --- Pengaturan ---
+        const newClassNameInput = document.getElementById('new-class-name');
+        const addClassBtn = document.getElementById('add-class-btn');
+        const classSelect = document.getElementById('class-select');
+        const studentNisInput = document.getElementById('student-nis');
+        const studentNameInput = document.getElementById('student-name');
+        const studentGenderSelect = document.getElementById('student-gender');
+        const studentDobInput = document.getElementById('student-dob');
+        const addStudentBtn = document.getElementById('add-student-btn');
+        const studentListContainerSettings = document.getElementById('student-list-container');
+        const newAssessmentTypeNameInput = document.getElementById('new-assessment-type-name');
+        const newAssessmentTypeMaxScoreInput = document.getElementById('new-assessment-type-max-score');
+        const addAssessmentTypeBtn = document.getElementById('add-assessment-type-btn');
+        const assessmentTypeListContainer = document.getElementById('assessment-type-list-container');
+        const storageBar = document.getElementById('storage-bar');
+        const storageText = document.getElementById('storage-text');
+        const backupDataBtn = document.getElementById('backup-data-btn');
+        const restoreDataBtn = document.getElementById('restore-data-btn');
+        const restoreFileInput = document.getElementById('restore-file-input');
+        const archiveDataBtn = document.getElementById('archive-data-btn');
+        const resetDataBtn = document.getElementById('reset-data-btn');
+
+        // --- Absensi ---
+        const attendanceClassTitle = document.getElementById('attendance-class-title');
+        const attendanceDateInput = document.getElementById('attendance-date');
+        const recapStatusContainer = document.getElementById('recap-status-container');
+        const studentAttendanceList = document.getElementById('student-attendance-list');
+        const saveAttendanceBtn = document.getElementById('save-attendance-btn');
+        
+        // --- Modals ---
+        const createAssessmentModal = document.getElementById('create-assessment-modal');
+        const newAssessmentTypeSelect = document.getElementById('new-assessment-type-select');
+        const newAssessmentNameInput = document.getElementById('new-assessment-name');
+        const newAssessmentDateInput = document.getElementById('new-assessment-date');
+        const saveAssessmentBtn = document.getElementById('save-assessment-btn');
+        const editModal = document.getElementById('edit-student-modal');
+        const editStudentForm = document.getElementById('edit-student-form');
+        const moveModal = document.getElementById('move-student-modal');
+        const confirmMoveBtn = document.getElementById('confirm-move-btn');
+        const deleteModal = document.getElementById('delete-student-modal');
+        const unsavedChangesModal = document.getElementById('unsaved-changes-modal');
+        const stayOnPageBtn = document.getElementById('stay-on-page-btn');
+        const leavePageBtn = document.getElementById('leave-page-btn');
+        const resetDataModal = document.getElementById('reset-data-modal');
+        const confirmResetBtn = document.getElementById('confirm-reset-btn');
+        const restoreDataModal = document.getElementById('restore-data-modal');
+        const confirmRestoreBtn = document.getElementById('confirm-restore-btn');
+
+
         // Variabel global untuk instance Firebase
         let app;
         let auth;
@@ -2329,6 +2469,4 @@
 
 </body>
 </html>
-
-
 
