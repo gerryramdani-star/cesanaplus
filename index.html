@@ -19,11 +19,6 @@
     <style>
         body { 
             font-family: 'Poppins', sans-serif; 
-            background-color: #f3f4f6; /* bg-gray-100 */
-            color: #374151; /* text-gray-700 */
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
         .page-section, .modal { 
@@ -2283,6 +2278,156 @@
             }
         };
 
+        const generateIndividualReport = async (studentId) => {
+            const reportContainer = document.getElementById('individual-report-content');
+            reportContainer.innerHTML = `<div class="text-center p-8"><p class="font-semibold">Memuat laporan siswa...</p></div>`;
+
+            const student = localStudents.find(s => s.id === studentId);
+            if (!student) {
+                reportContainer.innerHTML = `<p class="text-red-500">Gagal memuat data: Siswa tidak ditemukan.</p>`;
+                return;
+            }
+            const studentClass = localClasses.find(c => c.id === student.classId) || { name: 'N/A' };
+
+            try {
+                // 1. Fetch Attendance Data
+                const attendanceRef = collection(db, "userData", currentUser.uid, "attendance");
+                const attendanceQuery = query(attendanceRef, where("studentId", "==", studentId));
+                const attendanceSnapshot = await getDocs(attendanceQuery);
+                const attendanceSummary = { Hadir: 0, Sakit: 0, Izin: 0, Alfa: 0 };
+                attendanceSnapshot.forEach(doc => {
+                    const status = doc.data().status;
+                    if (attendanceSummary.hasOwnProperty(status)) {
+                        attendanceSummary[status]++;
+                    }
+                });
+                const totalAttendanceDays = Object.values(attendanceSummary).reduce((a, b) => a + b, 0);
+
+                // 2. Fetch Grades Data
+                const gradesRef = collection(db, "userData", currentUser.uid, "grades");
+                const gradesQuery = query(gradesRef, where("studentId", "==", studentId));
+                const gradesSnapshot = await getDocs(gradesQuery);
+                const gradesData = gradesSnapshot.docs.map(doc => doc.data());
+
+                // 3. Build HTML
+                let gradesTableHTML = '<tr><td colspan="3" class="text-center py-4 text-gray-500">Belum ada nilai yang diinput.</td></tr>';
+                if (gradesData.length > 0) {
+                    gradesTableHTML = gradesData.map(grade => {
+                        const assessment = localAssessments.find(a => a.id === grade.assessmentId);
+                        if (!assessment) return '';
+                        const assessmentType = localAssessmentTypes.find(t => t.id === assessment.assessmentTypeId) || { name: 'Penilaian' };
+                        return `
+                            <tr>
+                                <td class="py-2 px-4 border-b">${assessmentType.name}: ${assessment.title}</td>
+                                <td class="py-2 px-4 border-b text-center">${assessment.date}</td>
+                                <td class="py-2 px-4 border-b text-center font-bold text-lg">${grade.gradeValue}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+
+                const reportHTML = `
+                    <div class="space-y-8">
+                        <!-- Header -->
+                        <div>
+                            <h2 class="text-3xl font-bold text-center text-gray-800">Rapor Individual Siswa</h2>
+                            <p class="text-center text-gray-500">Tahun Ajaran 2023/2024</p>
+                        </div>
+
+                        <!-- Informasi Siswa -->
+                        <div class="p-4 border rounded-lg bg-gray-50">
+                            <h3 class="text-lg font-semibold mb-2 border-b pb-2">Informasi Siswa</h3>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div><strong>Nama:</strong> ${student.name}</div>
+                                <div><strong>NIS:</strong> ${student.nis}</div>
+                                <div><strong>Kelas:</strong> ${studentClass.name}</div>
+                                <div><strong>Jenis Kelamin:</strong> ${student.gender}</div>
+                            </div>
+                        </div>
+
+                        <!-- Rekap Kehadiran -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">Rekapitulasi Kehadiran</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                                <div class="grid grid-cols-2 gap-4 text-center">
+                                    <div class="p-4 bg-green-100 rounded-lg"><p class="text-2xl font-bold text-green-700">${attendanceSummary.Hadir}</p><p class="text-sm text-green-600">Hadir</p></div>
+                                    <div class="p-4 bg-yellow-100 rounded-lg"><p class="text-2xl font-bold text-yellow-700">${attendanceSummary.Sakit}</p><p class="text-sm text-yellow-600">Sakit</p></div>
+                                    <div class="p-4 bg-blue-100 rounded-lg"><p class="text-2xl font-bold text-blue-700">${attendanceSummary.Izin}</p><p class="text-sm text-blue-600">Izin</p></div>
+                                    <div class="p-4 bg-red-100 rounded-lg"><p class="text-2xl font-bold text-red-700">${attendanceSummary.Alfa}</p><p class="text-sm text-red-600">Alfa</p></div>
+                                </div>
+                                <div class="h-48 md:h-56">
+                                    <canvas id="individual-report-attendance-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rekap Nilai -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">Rekapitulasi Nilai</h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full bg-white">
+                                    <thead class="bg-gray-200">
+                                        <tr>
+                                            <th class="py-2 px-4 border-b text-left">Jenis Penilaian</th>
+                                            <th class="py-2 px-4 border-b text-center">Tanggal</th>
+                                            <th class="py-2 px-4 border-b text-center">Nilai</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${gradesTableHTML}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                reportContainer.innerHTML = reportHTML;
+                
+                // 4. Render Chart
+                const chartCanvas = document.getElementById('individual-report-attendance-chart');
+                if (individualReportAttendanceChart) {
+                    individualReportAttendanceChart.destroy();
+                }
+                if(totalAttendanceDays > 0 && chartCanvas) {
+                     individualReportAttendanceChart = new Chart(chartCanvas.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Hadir', 'Sakit', 'Izin', 'Alfa'],
+                            datasets: [{
+                                data: [
+                                    attendanceSummary.Hadir, 
+                                    attendanceSummary.Sakit, 
+                                    attendanceSummary.Izin, 
+                                    attendanceSummary.Alfa
+                                ],
+                                backgroundColor: ['#10B981', '#F59E0B', '#3B82F6', '#EF4444'],
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'right',
+                                }
+                            }
+                        }
+                    });
+                } else if (chartCanvas) {
+                    const ctx = chartCanvas.getContext('2d');
+                    ctx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = '#9ca3af';
+                    ctx.fillText('Belum ada data kehadiran', chartCanvas.width / 2, chartCanvas.height / 2);
+                }
+
+            } catch (error) {
+                console.error("Gagal membuat laporan individual:", error);
+                reportContainer.innerHTML = `<p class="text-red-500">Terjadi kesalahan saat memuat laporan.</p>`;
+            }
+        };
+
         // =================================================================
         // BAGIAN 4: EVENT LISTENERS
         // =================================================================
@@ -2474,5 +2619,6 @@
 
 </body>
 </html>
+}
 
 
