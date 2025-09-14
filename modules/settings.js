@@ -67,6 +67,20 @@ function renderClassDropdown() {
     }
 }
 
+/**
+ * FUNGSI BARU YANG DITAMBAHKAN
+ * Fungsi ini diekspor agar bisa dipanggil oleh ui.js saat navigasi halaman.
+ * Ini bertindak sebagai "jembatan" ke fungsi render yang sudah ada.
+ */
+export function renderStudentListPage() {
+    console.log("Merender halaman daftar siswa dari ui.js...");
+    // Panggil fungsi yang sudah ada untuk merender daftar siswa
+    // berdasarkan kelas yang sedang dipilih saat ini.
+    if (classSelect) {
+        renderStudentListSettings(classSelect.value);
+    }
+}
+
 export function renderStudentListSettings(classId) {
     const students = classId ? state.localStudents.filter(s => s.classId === classId) : [];
     if (students.length === 0) {

@@ -9,6 +9,7 @@ import { renderDashboard } from './dashboard.js';
 import { renderAttendancePage } from './attendance.js';
 import { renderGradesDashboard, renderGradeInputPage, generateIndividualReport } from './grades.js';
 import { renderReportPage } from './reports.js';
+// Impor yang sudah diperbaiki dari settings.js
 import { renderSettings, renderStudentListPage, loadIntegrationSettings } from './settings.js';
 
 // Selektor DOM untuk elemen UI umum
@@ -33,7 +34,11 @@ export function initUI() {
     navItems.forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
-            showPage(e.currentTarget.getAttribute('href').substring(1) + '-page');
+            // Pastikan href tidak null atau undefined
+            const pageTarget = e.currentTarget.getAttribute('href');
+            if (pageTarget) {
+                showPage(pageTarget.substring(1) + '-page');
+            }
         });
     });
     
@@ -69,6 +74,7 @@ function toggleSidebar() {
 
 // Menampilkan notifikasi toast
 export function showToast(message, type = 'success') {
+    if (!toastMessage || !globalToast) return; // Guard clause
     toastMessage.textContent = message;
     globalToast.className = `fixed top-5 right-5 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-transform duration-300 transform`;
     globalToast.classList.add(type === 'success' ? 'bg-green-500' : 'bg-red-500');
@@ -81,8 +87,8 @@ export function showToast(message, type = 'success') {
 }
 
 // Membuka dan menutup modal
-export const openModal = (modal) => modal.classList.add('active');
-export const closeModal = (modal) => modal.classList.remove('active');
+export const openModal = (modal) => modal && modal.classList.add('active');
+export const closeModal = (modal) => modal && modal.classList.remove('active');
 
 // Fungsi utama untuk navigasi halaman
 export function showPage(pageId, data = null) {
@@ -103,7 +109,7 @@ export function showPage(pageId, data = null) {
     const newNavItem = document.querySelector(`.nav-item a[href="#${pageId.replace('-page', '')}"]`);
     if (newNavItem) newNavItem.parentElement.classList.add('nav-item-active');
 
-    if (sidebar.classList.contains('translate-x-0')) {
+    if (sidebar && sidebar.classList.contains('translate-x-0')) {
         toggleSidebar();
     }
     
